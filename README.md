@@ -1,81 +1,157 @@
 # Autonomous Insurance Claims Processing Agent
 
-## Project Overview
-This project implements an autonomous agent for **First Notice of Loss (FNOL)** claims processing. It extracts key fields from insurance claim documents, validates mandatory fields, routes claims to the appropriate workflow, and provides reasoning for the routing decision.
+## 📌 Project Overview
 
-The project is divided into two parts:
-- **Backend:** Spring Boot application for document parsing, field extraction, validation, and routing.
-- **Frontend:** React.js application for uploading documents and displaying processed claim data.
+This repository implements an **Autonomous Insurance Claims Processing Agent** for **First Notice of Loss (FNOL)** documents. It processes uploaded PDF and TXT FNOL files, extracts key fields, validates mandatory information, applies routing rules, and returns a structured JSON response with a recommended workflow and explanation.
 
-
-## Tech Stack
-- **Backend:** Java, Spring Boot, Maven
-- **Frontend:** React.js, HTML, CSS, Axios
-- **Database:** MySQL (if needed for future storage)
-- **Others:** Postman (API testing)
+This project is structured as a full-stack application with a Spring Boot backend and a React frontend that allows users to upload documents and view processing results.
 
 ---
 
-## Folder Structure<br>
+## 🛠 Tech Stack
+
+**Backend**
+- Java
+- Spring Boot
+- Maven
+- Apache PDFBox (PDF parsing)
+
+**Frontend**
+- React.js
+- Axios
+- HTML/CSS
+
+**API Testing**
+- Postman
+
+---
+
+## 📁 Folder Structure
+
 Autonomous-Insurance-Claims-Agent/<br>
-├── backend/ # Spring Boot backend<br>
-│ ├── src/main/java/com/fnol/<br>
-│ ├── pom.xml<br>
-│ └── application.properties<br>
-├── frontend/ # React frontend<br>
-│ ├── public/<br>
-│ ├── src/<br>
-│ ├── package.json<br>
-│ └── README.md<br>
-└── README.md # This file<br>
+├── backend/ # Spring Boot backend <br>
+│ ├── src/main/java/com/fnol/ <br>
+│ ├── pom.xml <br>
+│ └── application.properties <br>
+├── frontend/ # React frontend <br>
+│ ├── public/ <br>
+│ ├── src/ <br>
+│ ├── package.json <br>
+│ └── README.md <br>
+└── README.md # Root README <br>
 
 
 ---
 
-## Features
-1. **Document Parsing:** Supports PDF and TXT files.
-2. **Field Extraction:** Extracts Policy, Incident, Parties, Asset, and Claim details.
-3. **Validation:** Identifies missing or inconsistent fields.
-4. **Claim Routing:** Routes claims based on rules:
-   - Damage < 25,000 → Fast-track
-   - Missing mandatory fields → Manual review
-   - Keywords like “fraud” → Investigation flag
-   - Claim type = injury → Specialist queue
-5. **JSON Output:** Returns extracted fields, missing fields, recommended route, and reasoning.
+## 🚀 Features
+
+### 🔹 Document Parsing
+- Supports uploading **PDF** and **TXT** files.
+- Extracts text using PDFBox or plain text read for .txt files.
+
+### 🔹 Field Extraction
+Extracts the following fields from claim documents:
+
+**Policy Information**
+- Policy Number  
+- Policyholder Name  
+- Effective Dates  
+
+**Incident Information**
+- Incident Date  
+- Incident Time  
+- Location  
+- Description  
+
+**Involved Parties**
+- Claimant  
+- Third Parties  
+- Contact Details  
+
+**Asset Details**
+- Asset Type  
+- Asset ID  
+- Estimated Damage  
+
+**Other Mandatory Fields**
+- Claim Type  
+- Attachments  
+- Initial Estimate  
 
 ---
 
-## Setup & Run<br>
+## ✅ Validation Logic
 
-### Backend<br>
-1. Navigate to `backend` folder:<br>
-   cd backend<br>
-2. Build and run Spring Boot:<br>
-   ->mvn clean install<br>
-   ->mvn spring-boot:run<br>
-3. API will be available at http://localhost:8080/api/fnol/analyze<br>
+Identifies missing mandatory fields and flags them in the output.
 
+---
 
+## 📊 Claim Routing Rules
 
+| Condition | Recommended Route |
+|-----------|-------------------|
+| Estimated damage < 25,000 | Fast-track |
+| Any mandatory field missing | Manual review |
+| Description contains words like “fraud”, “inconsistent”, “staged” | Investigation Flag |
+| Claim type = injury | Specialist Queue |
+| Otherwise | Standard Queue |
 
-### Frontend<br>
-1. Navigate to frontend folder:<br>
-   cd frontend<br>
-2. Install dependencies:<br>
-   npm install<br>
-3. Start frontend server:<br>
-   npm start<br>
-4. Open browser at http://localhost:3000<br>
+---
 
+## 📦 Output Format
 
-**API Usage**<br>
-     **Endpoint:** POST /api/fnol/analyze<br>
-     **Consumes:** multipart/form-data (file upload)<br>
-   **Response:** JSON containing extracted fields, missing fields, recommended route, and reasoning.<br>
+Every processed claim returns a single JSON object in this format:
 
-**Notes**<br>
-   This implementation uses regex-based extraction assuming structured document formats.<br>
-   For unstructured documents, LLM-based extraction can be integrated (details in README).<br>
+```json
+{
+  "extractedFields": {},
+  "missingFields": [],
+  "recommendedRoute": "",
+  "reasoning": ""
+}
+```
 
+## Backend
+```
+cd backend
+mvn clean install
+mvn spring-boot:run
+```
+By default, the API will be available at:
+```
+http://localhost:8080/api/fnol/process
+```
 
+## Frontend
+```
+cd frontend
+npm install
+npm start
+```
+The frontend will run at:
+```
+http://localhost:3000
+```
+## 📡 API Usage
+## Endpoint
+ POST /api/fnol/process
+## Consumes
+ multipart/form-data (file upload)
 
+## Response
+JSON with extracted fields, missing fields, recommended route, and reasoning.
+
+## 📝 Design Decisions
+
+The current implementation uses regex-based extraction assuming semi-structured FNOL documents with consistent labeled fields.
+Regex extraction provides deterministic and explainable field parsing.
+
+For more unstructured document formats (e.g., free text forms or scanned content), an LLM-based parser can be integrated. That integration point is designed to be pluggable, meaning a future LLM processor can replace or extend the current extraction strategy without breaking the rest of the pipeline.
+
+## 📌 Notes
+
+The project focuses on correctness and clarity of claim processing logic rather than advanced AI.
+
+Regex extraction assumes fairly standardized document structure, which matches the provided dummy FNOL samples.
+
+LLM integration, if added, should be implemented in a separate module or strategy while retaining the same output schema.
